@@ -1,0 +1,49 @@
+{
+  "name": "genai-event-hub",
+  "version": "1.0.0",
+  "description": "Observe an interplay of Generative AI systems for Explainable AI (XAI) purposes.",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "rm -rf ./dist && rm -rf types && tsc",
+    "test": "vitest",
+    "start": " npm run build && node dist/index.js"
+  },
+  "types": "dist/index.d.ts",
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/thehackersplaybook/genai-event-hub.git"
+  },
+  "bin": {
+    "genai-event-hub": "dist/index.js"
+  },
+  "keywords": [
+    "ai",
+    "developer-tools",
+    "shell-scripting",
+    "agent",
+    "automation"
+  ],
+  "author": "Aditya Patange",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/thehackersplaybook/genai-event-hub/issues"
+  },
+  "homepage": "https://github.com/thehackersplaybook/genai-event-hub#README",
+  "devDependencies": {
+    "@types/node": "^20.12.12",
+    "ts-node": "^10.9.2",
+    "tsx": "^4.11.0",
+    "typescript": "^5.4.5",
+    "vitest": "^2.1.8"
+  },
+  "dependencies": {
+    "@ai-sdk/anthropic": "^1.1.8",
+    "@ai-sdk/openai": "^1.1.12",
+    "ai": "^4.1.41",
+    "chalk": "^4.0.0",
+    "commander": "^13.1.0",
+    "dotenv": "^16.4.5",
+    "uuid": "^11.0.5",
+    "zod": "^3.23.8"
+  }
+}
