@@ -15,6 +15,7 @@ export class EventUnit extends EventEmitter {
   private verbose: boolean;
   private parentNetwork: Network | null;
   private eventController: EventController;
+  private broadcastedEvents: any[] = [];
 
   constructor(name: string, description: string, verbose: boolean = false) {
     super();
@@ -50,6 +51,8 @@ export class EventUnit extends EventEmitter {
       chalk.yellowBright,
       this.verbose
     );
+    eventBody.timestamp = Date.now();
+    this.broadcastedEvents.push(eventBody);
     this.emit("event", eventBody);
   }
 
@@ -69,5 +72,9 @@ export class EventUnit extends EventEmitter {
       const responseEvent = await this.eventController.respond(this, eventBody);
       this.broadcastEvent(responseEvent);
     }
+  }
+
+  public getBroadcastedEvents(): Readonly<any[]> {
+    return this.broadcastedEvents as any[];
   }
 }

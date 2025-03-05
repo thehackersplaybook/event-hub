@@ -9,6 +9,7 @@ export declare class EventUnit extends EventEmitter {
     private verbose;
     private parentNetwork;
     private eventController;
+    private broadcastedEvents;
     constructor(name: string, description: string, verbose?: boolean);
     getEventUnitId(): string;
     setParentNetwork(network: Network): void;
@@ -16,5 +17,6 @@ export declare class EventUnit extends EventEmitter {
     registerEventHandler(handler: EventHandler): Promise<void>;
     broadcastEvent(eventBody: any): Promise<void>;
     handleEvent(eventBody: any): Promise<void>;
+    getBroadcastedEvents(): Readonly<any[]>;
 }
 export {};

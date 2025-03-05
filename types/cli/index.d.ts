@@ -10,6 +10,7 @@ export declare class Cli {
     private verbose;
     private program;
     private commandMap;
+    private DEFAULT_TURNS;
     private constructor();
     private loadEnv;
     private loadDotenvFromPath;

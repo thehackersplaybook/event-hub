@@ -11,6 +11,8 @@ export class Network {
   private verbose: boolean;
   private static EVENT_UNITS_COUNT_MIN = 2;
   private static EVENT_UNITS_COUNT_MAX = 10;
+  private DEFAULT_TURNS = 5;
+  private DEFAULT_EVENT_LOGS_MEMORY_LENGTH = 10;
 
   constructor(
     title: string,
@@ -112,32 +114,78 @@ export class Network {
     }
   }
 
-  public async start(): Promise<void> {
+  public async start(options?: { turns?: number }): Promise<void> {
+    options = options || {
+      turns: this.DEFAULT_TURNS,
+    };
+
+    if (!options.turns) {
+      options.turns = this.DEFAULT_TURNS;
+    }
+
+    if (options.turns <= 0) {
+      throw new Error("Turns must be greater than 0.");
+    }
+
     try {
       StyledLogger.log("Starting network.", chalk.green);
-      const randomEventUnit =
-        this.eventUnits[Math.floor(Math.random() * this.eventUnits.length)];
-      const { object: randomEvent } = await ai.generateObject({
-        model: ai.getAIModel("openai/gpt-4o"),
-        system: prompts.EVENT_RESPONSE_SYSTEM_PROMPT(),
-        prompt: prompts.EVENT_RESPONSE_ACTION_PROMPT(
-          JSON.stringify(this.getNetworkDetails()),
-          JSON.stringify({
-            id: randomEventUnit.getEventUnitId(),
-            name: randomEventUnit.name,
-            description: randomEventUnit.description,
-          }),
-          {
-            eventId: uuidv4(),
-            name: "INIT_EVENT",
-            description:
-              "This is the start event which is invisible, generate the 'INIT_EVENT' as a response to this event.",
-            metadata: {},
-          }
-        ),
-        schema: schemas.eventResponseSchema,
-      });
-      randomEventUnit.broadcastEvent(randomEvent);
+
+      let curTurns = 0;
+
+      while (curTurns < options.turns) {
+        const randomEventUnit =
+          this.eventUnits[Math.floor(Math.random() * this.eventUnits.length)];
+
+        let randomEvent = null;
+
+        if (curTurns === 0) {
+          const { object } = await ai.generateObject({
+            model: ai.getAIModel("openai/gpt-4o"),
+            system: prompts.EVENT_RESPONSE_SYSTEM_PROMPT(),
+            prompt: prompts.EVENT_RESPONSE_ACTION_PROMPT(
+              JSON.stringify(this.getNetworkDetails()),
+              JSON.stringify({
+                id: randomEventUnit.getEventUnitId(),
+                name: randomEventUnit.name,
+                description: randomEventUnit.description,
+              }),
+              {
+                eventId: uuidv4(),
+                name: "INIT_EVENT",
+                description:
+                  "This is the start event which is invisible, generate the initialization event for the event unit as a response to this invisible event.",
+                purpose: "To keep the system running",
+                metadata: {},
+              }
+            ),
+            schema: schemas.eventResponseSchema,
+          });
+          randomEvent = object;
+        } else {
+          const { object } = await ai.generateObject({
+            model: ai.getAIModel("openai/gpt-4o"),
+            system: prompts.EVENT_RESPONSE_SYSTEM_PROMPT(),
+            prompt: prompts.EVENT_RESPONSE_ACTION_PROMPT(
+              JSON.stringify(this.getNetworkDetails()),
+              JSON.stringify({
+                id: randomEventUnit.getEventUnitId(),
+                name: randomEventUnit.name,
+                description: randomEventUnit.description,
+              }),
+              JSON.stringify(
+                this.getEventLogs({
+                  sorted: true,
+                  tail: this.DEFAULT_EVENT_LOGS_MEMORY_LENGTH,
+                })
+              )
+            ),
+            schema: schemas.eventResponseSchema,
+          });
+          randomEvent = object;
+        }
+        randomEventUnit.broadcastEvent(randomEvent);
+        curTurns++;
+      }
     } catch (error) {
       StyledLogger.logError("Failed to start network.", chalk.red);
       console.error(error);
@@ -156,5 +204,29 @@ export class Network {
         parentNetwork: unit.getParentNetwork()?.getNetworkId(),
       })),
     };
+  }
+
+  public getEventLogs(options: { sorted?: boolean; tail?: number }): any[] {
+    options = options || {
+      sorted: true,
+      tail: -1,
+    };
+
+    const events = this.eventUnits.reduce((acc: any[], unit: EventUnit) => {
+      return acc.concat(unit.getBroadcastedEvents());
+    }, []);
+
+    if (options?.sorted) {
+      events.sort((a: any, b: any) => a.timestamp - b.timestamp);
+    }
+
+    if (
+      options?.tail ||
+      (options.tail && options.tail !== -1 && options.tail > 0)
+    ) {
+      return events.slice(-options.tail);
+    }
+
+    return events;
   }
 }

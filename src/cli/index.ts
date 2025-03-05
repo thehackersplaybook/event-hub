@@ -13,6 +13,7 @@ interface StartCliOptions {
   prompt: string;
   verbose: boolean;
   envFilePath: string;
+  turns?: number;
 }
 
 export class Cli {
@@ -22,6 +23,7 @@ export class Cli {
   private verbose: boolean;
   private program: Command;
   private commandMap: Map<string, Function> = new Map();
+  private DEFAULT_TURNS = 10;
 
   private constructor(options?: CliOptions) {
     this.options = options || {
@@ -87,6 +89,11 @@ export class Cli {
       .option("--prompt <prompt>", "Initial prompt to start the system")
       .option("--verbose", "Enable verbosity")
       .option("--env <path>", "Path to the env file with API keys")
+      .option(
+        "--turns <number>",
+        "Number of turns for the simulation",
+        String(this.DEFAULT_TURNS)
+      )
       .parse(process.argv);
   }
 
@@ -115,7 +122,7 @@ export class Cli {
       return;
     }
 
-    await network.start();
+    await network.start({ turns: options.turns });
   }
 
   public static getInstance(options?: CliOptions): Cli {
@@ -137,6 +144,7 @@ export class Cli {
         prompt: options.prompt,
         verbose: options.verbose,
         envFilePath: options.env,
+        turns: options.turns ?? this.DEFAULT_TURNS,
       });
     } else {
       console.log(chalk.red("Invalid command."));

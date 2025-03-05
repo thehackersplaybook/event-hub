@@ -55,4 +55,15 @@ export const prompts = {
           metadata: object
         }
       `,
+
+  GENERATE_EVENT_ACTION_PROMPT: (
+    networkDetails: string,
+    eventUnitDetails: string,
+    eventLogs: any[]
+  ): string => `
+        Network: '''${networkDetails}'''
+        Current Event Unit: '''${eventUnitDetails}'''
+        Event Logs: '''${eventLogs}'''
+        Generate an event for the given event unit and ensure that the new event is in accordance with the event logs.
+        `,
 };
