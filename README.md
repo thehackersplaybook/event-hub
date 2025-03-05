@@ -2,7 +2,7 @@
 
 Observe a random interplay of events between Generative AI systems. Developed as part of our Explainable AI (XAI) initiative.
 
-**NOTE**: You need an Open AI API key or Anthropic API key to run this program.
+**NOTE**: You need an Open AI API key or Anthropic API key (currently not supported) to run this program.
 
 ## Usage
 
@@ -13,6 +13,8 @@ Observe a random interplay of events between Generative AI systems. Developed as
 ```bash
 npm install genai-event-hub
 ```
+
+- Create an env or .env file depending on your naming conventions, and add an `OPENAI_API_KEY` which you can pass to the CLI.
 
 - Start the simulation.
 
