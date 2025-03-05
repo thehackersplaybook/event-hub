@@ -17,7 +17,7 @@ npm install genai-event-hub
 - Start the simulation.
 
 ```bash
-npx genai-event-hub --start --prompt "systems in an audio streaming platform like Spotify"
+npx genai-event-hub --start --prompt "systems in an audio streaming platform like Spotify" --env .env
 ```
 
 ## Contributions
